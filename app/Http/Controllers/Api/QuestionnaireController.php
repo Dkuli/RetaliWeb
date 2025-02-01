@@ -17,8 +17,8 @@ class QuestionnaireController extends Controller
         $tourLeader = TourLeader::find(auth()->id());
 
         $questionnaires = $tourLeader->assignedQuestionnaires()
-            ->where('status', 'published')
-            ->where('end_date', '>', now())
+            ->where('questionnaires.status', 'published')  // Explicitly specify the table name
+            ->where('questionnaires.end_date', '>', now())
             ->with(['questions'])
             ->get();
 
