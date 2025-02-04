@@ -3,109 +3,213 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TourLeaderResource\Pages;
-use App\Filament\Resources\TourLeaderResource\RelationManagers;
 use App\Models\TourLeader;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components;
-
-
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\Action;
+use Filament\Support\Enums\ActionSize;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
 
 class TourLeaderResource extends Resource
 {
     protected static ?string $model = TourLeader::class;
-    protected static ?string $navigationIcon = 'heroicon-o-users';
 
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationGroup = 'Tour Management';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Tour Leader';
+
+    protected static ?string $pluralModelLabel = 'Tour Leaders';
 
     public static function form(Form $form): Form
     {
-        return $form->schema([
-            Forms\Components\Group::make([
+        return $form
+            ->schema([
                 Forms\Components\Section::make('Basic Information')
+                    ->description('Manage the tour leader\'s basic information.')
+                    ->icon('heroicon-o-user')
+                    ->columns(['sm' => 2])
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->required(),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255)
+                            ->label('Full Name'),
+
+                        TextInput::make('email')
                             ->email()
                             ->required()
+                            ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('phone'),
-                        Forms\Components\TextInput::make('password')
+
+                        TextInput::make('phone')
+                            ->tel()
+                            ->required()
+                            ->maxLength(20),
+
+                        TextInput::make('password')
                             ->password()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Status')
-                    ->schema([
-                        Forms\Components\Toggle::make('is_active'),
-                        Forms\Components\Select::make('current_group_id')
-                            ->relationship('currentGroup', 'name'),
-                        Forms\Components\DatePicker::make('activation_start'),
-                        Forms\Components\DatePicker::make('activation_end'),
-                    ])->columns(2),
-            ])->columnSpan(['lg' => 2]),
-
-            Forms\Components\Group::make([
-                Forms\Components\Section::make('Avatar')
-                    ->schema([
-                        Forms\Components\FileUpload::make('avatar')
-                            ->image()
-                            ->directory('tour-leaders')
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->maxLength(255)
+                            ->visible(fn (string $context): bool => $context === 'create'),
                     ]),
-            ])->columnSpan(['lg' => 1]),
-        ])->columns(3);
+
+                Forms\Components\Section::make('Foto Profil')
+                ->description('Unggah foto jamaah')
+                ->icon('heroicon-o-camera')
+                ->collapsible()
+                ->schema([
+                    FileUpload::make('avatar')
+                        ->label('Foto')
+                        ->image()
+                        ->disk('public')
+                        ->directory('avatar')
+                        ->imageResizeMode('cover')
+                        ->imageCropAspectRatio('1:1')
+                        ->imageResizeTargetWidth('300')
+                        ->imageResizeTargetHeight('300')
+                        ->helperText('Upload foto ukuran 4x6 dengan latar belakang putih')
+                ]),
+
+                Forms\Components\Section::make('Status & Group')
+                    ->description('Manage access and group assignment.')
+                    ->icon('heroicon-o-cog')
+                    ->schema([
+                        Toggle::make('is_active')
+                            ->label('Active Status')
+                            ->default(true)
+                            ->helperText('Deactivate to temporarily suspend access.'),
+
+                        Select::make('current_group_id')
+                            ->relationship('currentGroup', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                            ]),
+                    ]),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('avatar_url')
-                    ->label('Avatar')
-                    ->circular(),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('currentGroup.name')
+                ImageColumn::make('avatar')
+                ->label('Foto')
+                ->circular(),
+
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+
+                TextColumn::make('email')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-m-envelope'),
+
+                TextColumn::make('phone')
+                    ->searchable()
+                    ->icon('heroicon-m-phone'),
+
+                TextColumn::make('currentGroup.name')
+                    ->label('Current Group')
+                    ->sortable()
+                    ->badge(),
+
+                ToggleColumn::make('is_active')
+                    ->label('Active')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('last_active')
-                    ->getStateUsing(fn ($record) => $record->locations()->latest()->first()?->tracked_at)
-                    ->dateTime(),
+
+                TextColumn::make('last_active_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->icon('heroicon-m-clock'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('current_group')
-                    ->relationship('currentGroup', 'name'),
-                Tables\Filters\TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_active')
+                    ->label('Active Status')
+                    ->indicator('Active Tour Leaders'),
+
+                SelectFilter::make('current_group_id')
+                    ->label('Current Group')
+                    ->relationship('currentGroup', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('changePassword')
+                        ->icon('heroicon-m-key')
+                        ->form([
+                            TextInput::make('new_password')
+                                ->label('New Password')
+                                ->password()
+                                ->required()
+                                ->minLength(8)
+                                ->confirmed(),
+                            TextInput::make('new_password_confirmation')
+                                ->label('Confirm New Password')
+                                ->password()
+                                ->required(),
+                        ])
+                        ->action(function (TourLeader $record, array $data): void {
+                            $record->update([
+                                'password' => Hash::make($data['new_password']),
+                            ]);
+
+                            Notification::make()
+                                ->success()
+                                ->title('Password updated successfully')
+                                ->send();
+                        }),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                    Tables\Actions\BulkAction::make('activateBulk')
+                        ->label('Activate Selected')
+                        ->icon('heroicon-m-check-circle')
+                        ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
+                        ->requiresConfirmation(),
+                    Tables\Actions\BulkAction::make('deactivateBulk')
+                        ->label('Deactivate Selected')
+                        ->icon('heroicon-m-x-circle')
+                        ->color('danger')
+                        ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
+                        ->requiresConfirmation(),
+                ])
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            RelationManagers\LocationsRelationManager::class,
-            RelationManagers\NotificationsRelationManager::class,
-            RelationManagers\ContentsRelationManager::class,
-
+            //
         ];
     }
 
@@ -119,11 +223,8 @@ class TourLeaderResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
+    public static function getNavigationBadge(): ?string
     {
-        return [
-            TourLeaderResource\Widgets\TourLeaderStatsWidget::class,
-            TourLeaderResource\Widgets\LocationTrackingWidget::class,
-        ];
+        return static::getModel()::where('is_active', true)->count();
     }
 }

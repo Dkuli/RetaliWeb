@@ -14,7 +14,7 @@ class TourLeader extends Authenticatable implements HasMedia
     use HasFactory,HasApiTokens, Notifiable, InteractsWithMedia;
 
 
-    protected $appends = ['avatar_url'];
+
 
     protected $fillable = [
         'name',
@@ -28,6 +28,7 @@ class TourLeader extends Authenticatable implements HasMedia
         'activation_end',
         'activation_code',
         'last_active_at',
+        'avatar',
     ];
 
     protected $hidden = [
@@ -42,9 +43,15 @@ class TourLeader extends Authenticatable implements HasMedia
         'activation_end' => 'date',
     ];
 
-    public function getAvatarUrlAttribute()
+
+
+   
+
+    public function registerMediaCollections(): void
     {
-        return $this->getFirstMediaUrl('avatar') ?: null;
+        $this->addMediaCollection('avatar')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif']);
     }
 
     public function currentGroup()
@@ -78,5 +85,9 @@ class TourLeader extends Authenticatable implements HasMedia
     return $this->hasMany(QuestionnaireResponse::class);
     }
 
- 
+    public function getAvatarUrlAttribute($value)
+    {
+        return $value ? asset('storage/' . $value) : null;
+    }
+
 }
