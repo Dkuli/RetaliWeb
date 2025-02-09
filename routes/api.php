@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\QuestionnaireController;
 
 use App\Http\Controllers\Api\CarouselController;
 use App\Http\Controllers\Api\LuggageScanController;
+use App\Http\Controllers\Api\LuggageHistoryController;
 
 
 Route::prefix('v1')->group(function () {
@@ -29,6 +30,9 @@ Route::prefix('v1')->group(function () {
         Route::middleware(['ensure.active.tourleader'])->group(function () {
 
             Route::post('/luggage_scans', [LuggageScanController::class, 'store']);
+            Route::get('luggage/{luggageNumber}/history', [LuggageHistoryController::class, 'getByLuggageNumber']);
+            Route::get('luggage/scans/mine', [LuggageHistoryController::class, 'getMyScans']);
+            Route::get('luggage/stats/mine', [LuggageHistoryController::class, 'getMyStats']);
             // Group routes
             Route::get('group/current', [GroupController::class, 'current']);
             Route::get('group/pilgrims', [GroupController::class, 'pilgrims']);

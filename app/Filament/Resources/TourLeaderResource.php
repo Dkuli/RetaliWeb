@@ -66,6 +66,8 @@ class TourLeaderResource extends Resource
                         TextInput::make('password')
                             ->password()
                             ->dehydrated(fn ($state) => filled($state))
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+
                             ->required(fn (string $context): bool => $context === 'create')
                             ->maxLength(255)
                             ->visible(fn (string $context): bool => $context === 'create'),

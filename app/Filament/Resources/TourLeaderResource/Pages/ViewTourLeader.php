@@ -25,7 +25,7 @@ class ViewTourLeader extends ViewRecord
             ->schema([
                 Infolists\Components\Section::make('Profile Information')
                     ->schema([
-                        Infolists\Components\ImageEntry::make('avatar_url')
+                        Infolists\Components\ImageEntry::make('avatar')
                             ->label('Profile Picture')
                             ->circular(),
                         Infolists\Components\TextEntry::make('name')
@@ -71,6 +71,7 @@ class ViewTourLeader extends ViewRecord
                 ->action(function (array $data): void {
                     $this->record->update([
                         'password' => Hash::make($data['new_password']),
+                        
                     ]);
 
                     Notification::make()

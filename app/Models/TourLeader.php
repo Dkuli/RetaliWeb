@@ -45,7 +45,7 @@ class TourLeader extends Authenticatable implements HasMedia
 
 
 
-   
+
 
     public function registerMediaCollections(): void
     {
@@ -85,7 +85,7 @@ class TourLeader extends Authenticatable implements HasMedia
     return $this->hasMany(QuestionnaireResponse::class);
     }
 
-    public function getAvatarUrlAttribute($value)
+    public function getAvatarAttribute($value)
     {
         return $value ? asset('storage/' . $value) : null;
     }
