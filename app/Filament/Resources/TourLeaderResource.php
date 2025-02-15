@@ -28,8 +28,6 @@ class TourLeaderResource extends Resource
 {
     protected static ?string $model = TourLeader::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
-
     protected static ?string $navigationGroup = 'Tour Management';
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -143,10 +141,7 @@ class TourLeaderResource extends Resource
                     ->label('Active')
                     ->sortable(),
 
-                TextColumn::make('last_active_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->icon('heroicon-m-clock'),
+
             ])
             ->filters([
                 TernaryFilter::make('is_active')

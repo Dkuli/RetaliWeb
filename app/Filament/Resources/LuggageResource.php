@@ -15,11 +15,14 @@ use Filament\Forms\Components\Card;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\BulkAction;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LuggageExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LuggageResource extends Resource
 {
     protected static ?string $model = Luggage::class;
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     protected static ?int $navigationSort = 1;
 
@@ -118,6 +121,52 @@ class LuggageResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    BulkAction::make('export')
+                        ->label('Export')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->form([
+                            Forms\Components\Select::make('type')
+                                ->label('Tipe File')
+                                ->options([
+                                    'excel' => 'Excel',
+                                    'pdf' => 'PDF'
+                                ])
+                                ->required(),
+                            Forms\Components\DatePicker::make('start_date')
+                                ->label('Tanggal Mulai'),
+                            Forms\Components\DatePicker::make('end_date')
+                                ->label('Tanggal Akhir')
+                                ->afterOrEqual('start_date'),
+                        ])
+                        ->action(function (array $data) {
+                            $startDate = $data['start_date'] ?? null;
+                            $endDate = $data['end_date'] ?? null;
+
+                            if ($data['type'] === 'excel') {
+                                return Excel::download(
+                                    new LuggageExport($startDate, $endDate),
+                                    'luggage-' . now()->format('Y-m-d') . '.xlsx'
+                                );
+                            } else {
+                                $luggage = Luggage::query()
+                                    ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                                        $query->whereBetween('created_at', [$startDate, $endDate]);
+                                    })
+                                    ->withCount('scans')
+                                    ->with('scans')
+                                    ->get();
+
+                                $pdf = PDF::loadView('exports.luggage', [
+                                    'luggage' => $luggage,
+                                    'startDate' => $startDate ? \Carbon\Carbon::parse($startDate) : null,
+                                    'endDate' => $endDate ? \Carbon\Carbon::parse($endDate) : null,
+                                ]);
+
+                                return response()->streamDownload(function () use ($pdf) {
+                                    echo $pdf->output();
+                                }, 'luggage-' . now()->format('Y-m-d') . '.pdf');
+                            }
+                        })
                 ]),
             ])
             ->emptyStateActions([

@@ -25,7 +25,7 @@ class ListGroups extends ListRecords
     {
         return [
             GroupResource\Widgets\GroupStatsWidget::class,
-            GroupResource\Widgets\UpcomingActivitiesWidget::class,
+  
         ];
     }
 }

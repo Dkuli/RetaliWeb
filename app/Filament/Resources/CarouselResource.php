@@ -21,8 +21,6 @@ use Filament\Support\Enums\IconPosition;
 class CarouselResource extends Resource
 {
     protected static ?string $model = Carousel::class;
-    protected static ?string $navigationIcon = 'heroicon-o-photo';
-   
 
     public static function form(Form $form): Form
     {
@@ -80,7 +78,7 @@ class CarouselResource extends Resource
             'index' => Pages\ListCarousels::route('/'),
             'create' => Pages\CreateCarousel::route('/create'),
             'edit' => Pages\EditCarousel::route('/{record}/edit'),
-            'view' => Pages\ViewCarousel::route('/{record}'),
+
         ];
     }
 }

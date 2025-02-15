@@ -24,7 +24,6 @@ use Filament\Forms\Components\Repeater;
 class GroupResource extends Resource
 {
     protected static ?string $model = Group::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
     protected static ?string $navigationLabel = 'Keloter';
     protected static ?string $modelLabel = 'Keloter';
     protected static ?string $pluralModelLabel = 'Keloter';

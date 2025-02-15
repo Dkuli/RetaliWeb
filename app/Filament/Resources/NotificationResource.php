@@ -23,8 +23,6 @@ class NotificationResource extends Resource
 {
     protected static ?string $model = TourLeader::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bell';
-
     protected static ?string $navigationLabel = 'Kirim Notifikasi';
 
     protected static ?string $pluralModelLabel = 'Kirim Notifikasi';

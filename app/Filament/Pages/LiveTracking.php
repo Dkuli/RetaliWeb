@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 class LiveTracking extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-map';
+    
     protected static string $view = 'filament.pages.live-tracking';
 
     public $tourLeaders = [];
@@ -53,8 +53,7 @@ class LiveTracking extends Page
     }
 
     public function handleLocationUpdate($data)
-{
-    $this->loadTourLeaders();
-
-}
+    {
+        $this->loadTourLeaders();
+    }
 }

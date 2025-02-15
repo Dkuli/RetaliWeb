@@ -87,15 +87,16 @@ class ViewResponses extends Page
                     "responses-{$this->record->id}.xlsx"
                 )),
 
-            Action::make('export_pdf')
+                Action::make('export_pdf')
                 ->label('Export PDF')
+                ->icon('heroicon-o-document-arrow-down')
                 ->action(function () {
                     return response()->streamDownload(function () {
                         echo Pdf::loadView('exports.questionnaire', [
                             'record' => $this->record,
-                            'summary' => $this->summary
-                        ])->stream();
-                    }, "responses-{$this->record->id}.pdf");
+                            'summary' => $this->summary()
+                        ])->setPaper('a4')->stream();
+                    }, "{$this->record->title}-responses.pdf");
                 })
         ];
     }

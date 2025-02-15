@@ -3,16 +3,18 @@
 namespace App\Filament\Resources\NotificationResource\Pages;
 
 use App\Filament\Resources\NotificationResource;
-use App\Models\Notification;
+
 use App\Models\TourLeader;
 use App\Services\FcmService;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Log;
-use Filament\Notifications\Notification as FilamentNotification;
+
 use Filament\Resources\Pages\Page;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification as FilamentNotification;
 
 class SendNotification extends Page
 {
@@ -103,7 +105,7 @@ class SendNotification extends Page
             }
         }
 
-        Notification::make()
+        FilamentNotification::make()
             ->success()
             ->title('Notifikasi berhasil dikirim')
             ->send();

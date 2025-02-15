@@ -19,7 +19,6 @@ use App\Services\FcmService;
 class QuestionnaireResource extends Resource
 {
     protected static ?string $model = Questionnaire::class;
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function form(Form $form): Form
     {

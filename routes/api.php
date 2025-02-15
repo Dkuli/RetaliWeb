@@ -42,7 +42,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/location/update', [LocationController::class, 'update']);
             // kusioner
             Route::apiResource('questionnaires', QuestionnaireController::class)->only(['index', 'show']);
-    Route::post('questionnaires/{questionnaire}/submit', [QuestionnaireController::class, 'submit']);
+            Route::post('questionnaires/{questionnaire}/submit', [QuestionnaireController::class, 'submit']);
 
             // Content routes
             Route::get('contents', [ContentController::class, 'index']);

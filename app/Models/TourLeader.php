@@ -13,9 +13,6 @@ class TourLeader extends Authenticatable implements HasMedia
 {
     use HasFactory,HasApiTokens, Notifiable, InteractsWithMedia;
 
-
-
-
     protected $fillable = [
         'name',
         'email',
@@ -42,9 +39,6 @@ class TourLeader extends Authenticatable implements HasMedia
         'activation_start' => 'date',
         'activation_end' => 'date',
     ];
-
-
-
 
 
     public function registerMediaCollections(): void

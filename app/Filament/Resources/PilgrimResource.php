@@ -28,7 +28,6 @@ use Filament\Infolists\Components\Grid as InfoGrid;
 class PilgrimResource extends Resource
 {
     protected static ?string $model = Pilgrim::class;
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Jamaah';
     protected static ?string $modelLabel = 'Jamaah';
     protected static ?string $pluralModelLabel = 'Jamaah';

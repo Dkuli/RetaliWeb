@@ -17,7 +17,6 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class ContentResource extends Resource
 {
     protected static ?string $model = Content::class;
-    protected static ?string $navigationIcon = 'heroicon-o-photo';
 
     public static function form(Form $form): Form
     {
