@@ -17,7 +17,7 @@ use Livewire\Livewire;
 |
 */
 
-Route::redirect('/', '/admin');
+Route::redirect('/', '/');
 
 Route::get('/print/pilgrim-card/{pilgrim}', [PilgrimCardController::class, 'print'])
     ->name('print.pilgrim.card');
