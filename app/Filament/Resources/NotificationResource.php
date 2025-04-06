@@ -21,15 +21,13 @@ use App\Services\FcmService;
 
 class NotificationResource extends Resource
 {
-    protected static ?string $model = TourLeader::class;
+    protected static ?string $model = Notification::class;
 
     protected static ?string $navigationLabel = 'Kirim Notifikasi';
 
     protected static ?string $pluralModelLabel = 'Kirim Notifikasi';
 
     protected static ?string $modelLabel = 'Kirim Notifikasi';
-
-
 
     public static function form(Form $form): Form
     {
@@ -58,6 +56,15 @@ class NotificationResource extends Resource
     {
         return [
             'index' => Pages\SendNotification::route('/'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            Widgets\NotificationStatsWidget::class,
+            Widgets\UnreadNotificationsWidget::class,
+            Widgets\FcmStatusWidget::class,
         ];
     }
 }
